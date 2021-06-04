@@ -30,6 +30,12 @@ def moe_st_error(prim_weights, rep_weight_frame, p=''):
         prim_weights: Primary weight column
         rep_weight_frame: Replicate weights
         p: Output column prefix
+    Returns:
+        prim_weights: Primary weight column
+        SE_: Standard error
+        MOE: Margin of Error
+        lb: Lower bound
+        ub: Upper bound
     '''
     z_score = 1.645  # 90% confidence
     # Subtracting the primary weights from each replicate weight then
@@ -42,6 +48,14 @@ def moe_st_error(prim_weights, rep_weight_frame, p=''):
                          p+' MOE': MOE, p+' LB': lb, p+' UB': ub})
 
 def recode(col_value):
+    ''' Recodes values in the ESR column
+    
+    Args:
+        col_value: one column value
+    Returns 
+        Unemp: unemployed
+        Other: Employed
+    '''
     if col_value == 3:
         return 'Unemp'
     elif col_value in [1, 2, 4, 5]:
