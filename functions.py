@@ -44,7 +44,7 @@ def moe_st_error(prim_weights, rep_weight_frame, p=''):
     MOE = 4/80 * 1.645 * SE_  # multiplying the SE by the z score to get MOE
     # +/- the MOE to and from the primary weights to get upper and lower bound
     lb, ub = prim_weights - MOE, prim_weights + MOE
-    return pd.DataFrame({p+' ': prim_weights, p+' SE': SE_,
+    return pd.DataFrame({p+'Metric': prim_weights, p+' SE': SE_,
                          p+' MOE': MOE, p+' LB': lb, p+' UB': ub})
 
 def recode(col_value):
@@ -62,3 +62,24 @@ def recode(col_value):
         return 'Other'
     else:
         return np.NaN
+    
+    
+def group(df,g1,g2,operation='sum'):
+    p = 'PWGTP' # Primary weight
+    w = list(df.filter(regex = r'PWGTP/d+?').columns) # Replicate weights
+    
+    if operation =='mean':
+        age_df = age_dist = pd.DataFrame(df.groupby([g1,g2])
+                        .mean())
+    else:
+        age_df = age_dist = pd.DataFrame(df.groupby([g1,g2])
+                        .sum())
+    
+    calcs = moe_st_error(age_df[p], age_df[w]).reset_index()
+    
+    pivoted = pd.pivot_table(calcs[[g1,g2,'Metric']],index=g1,columns=g2)
+    
+    props = pivoted.apply(lambda x: x / pivoted.sum(axis=1))
+    
+    return pivoted, props
+
